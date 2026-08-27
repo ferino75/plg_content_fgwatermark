@@ -20,7 +20,7 @@ class WatermarkEngine
 	 * output, even when no user-facing parameter actually changed (e.g. a bug
 	 * fix in the rendering code itself, like SVG support in 1.6.0).
 	 */
-	const VERSION = '2.1.0';
+	const VERSION = '2.1.1';
 
 	/** @var object  Joomla Registry (or JRegistry) instance - both expose ->get() identically */
 	protected $params;

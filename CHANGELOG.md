@@ -1,5 +1,15 @@
 # Changelog - plg_content_fgwatermark
 
+## 2.1.1
+- Fix: the new "Also rewrite links to images" field description (added in
+  2.1.0) contained literal `<a href="...">` / `<img src>` markup inside the
+  language string. Joomla renders field descriptions as raw HTML, so the
+  unclosed/malformed tags corrupted the admin form's HTML and broke the
+  plugin settings screen's tab layout - same class of bug as the `<script>`-
+  in-a-description issue previously hit on fgadminlogincustom. Reworded to
+  plain prose ("the img tag's src attribute" / "the href attribute in
+  links") with no angle brackets, in both en-GB and sk-SK.
+
 ## 2.1.0
 - Added lightbox compatibility: the plugin now also rewrites `<a href="...">`
   links that point directly at one of your own in-scope images (not just
