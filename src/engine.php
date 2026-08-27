@@ -20,7 +20,7 @@ class WatermarkEngine
 	 * output, even when no user-facing parameter actually changed (e.g. a bug
 	 * fix in the rendering code itself, like SVG support in 1.6.0).
 	 */
-	const VERSION = '2.0.0';
+	const VERSION = '2.1.0';
 
 	/** @var object  Joomla Registry (or JRegistry) instance - both expose ->get() identically */
 	protected $params;
@@ -31,23 +31,39 @@ class WatermarkEngine
 	}
 
 	/**
-	 * Find <img> tags in HTML and replace their src with the watermarked version.
+	 * Find <img> tags (and, if enabled, <a href> links pointing directly at an
+	 * image - e.g. a lightbox's "full size" link) in HTML and rewrite them to
+	 * the watermarked/cached version.
 	 */
 	public function processHtml($html)
 	{
-		if (empty($html) || stripos($html, '<img') === false) {
+		if (empty($html)) {
 			return $html;
 		}
 
 		$engine = $this;
 
-		return preg_replace_callback(
-			'/<img\s+[^>]*>/i',
-			function ($matches) use ($engine) {
-				return $engine->processImgTag($matches[0]);
-			},
-			$html
-		);
+		if (stripos($html, '<img') !== false) {
+			$html = preg_replace_callback(
+				'/<img\s+[^>]*>/i',
+				function ($matches) use ($engine) {
+					return $engine->processImgTag($matches[0]);
+				},
+				$html
+			);
+		}
+
+		if ((int) $this->params->get('rewrite_links', 1) && stripos($html, '<a') !== false) {
+			$html = preg_replace_callback(
+				'/<a\s+[^>]*>/i',
+				function ($matches) use ($engine) {
+					return $engine->processAnchorTag($matches[0]);
+				},
+				$html
+			);
+		}
+
+		return $html;
 	}
 
 	/**
@@ -57,70 +73,19 @@ class WatermarkEngine
 	 */
 	public function processImgTag($tag)
 	{
-		if (!extension_loaded('gd')) {
-			return $tag;
-		}
-
 		if (!preg_match('/src\s*=\s*["\']([^"\']+)["\']/i', $tag, $srcMatch)) {
 			return $tag;
 		}
 
-		$src = $srcMatch[1];
-
-		if (preg_match('/class\s*=\s*["\']([^"\']*)["\']/i', $tag, $classMatch)) {
-			$classes = preg_split('/\s+/', $classMatch[1]);
-
-			if (in_array('no-watermark', $classes, true)) {
-				return $tag;
-			}
-		}
-
-		$relPath = $this->toRelativePath($src);
-
-		if ($relPath === null) {
+		if ($this->hasNoWatermarkClass($tag)) {
 			return $tag;
 		}
 
-		$cacheFolder = trim((string) $this->params->get('cache_folder', 'images/fgwatermark_cache'), '/');
+		$cachedUrl = $this->resolveWatermarkedUrl($srcMatch[1]);
 
-		if (strpos($relPath, $cacheFolder) === 0) {
+		if ($cachedUrl === null) {
 			return $tag;
 		}
-
-		if (!$this->inScope($relPath)) {
-			return $tag;
-		}
-
-		$ext = strtolower(pathinfo($relPath, PATHINFO_EXTENSION));
-
-		if (!in_array($ext, array('jpg', 'jpeg', 'png', 'gif'), true)) {
-			return $tag;
-		}
-
-		$sourceFullPath = JPATH_ROOT . '/' . $relPath;
-
-		if (!is_file($sourceFullPath)) {
-			return $tag;
-		}
-
-		$minWidth = (int) $this->params->get('min_width', 150);
-		$size     = @getimagesize($sourceFullPath);
-
-		if ($size === false) {
-			return $tag;
-		}
-
-		if ($minWidth > 0 && $size[0] < $minWidth && $size[1] < $minWidth) {
-			return $tag;
-		}
-
-		$cachedRelPath = $this->getCachedImage($relPath, $sourceFullPath, $ext, $size);
-
-		if ($cachedRelPath === null) {
-			return $tag;
-		}
-
-		$cachedUrl = $this->getRootPath() . '/' . $cachedRelPath;
 
 		return preg_replace(
 			'/src\s*=\s*["\']([^"\']+)["\']/i',
@@ -128,6 +93,110 @@ class WatermarkEngine
 			$tag,
 			1
 		);
+	}
+
+	/**
+	 * Process a single <a ...> opening tag: if its href points directly at one
+	 * of our own in-scope images (the common lightbox pattern - a thumbnail
+	 * wrapped in a link to the full-size original, e.g. FG AutoLightbox and
+	 * most other lightbox plugins), rewrite href to the same cached/watermarked
+	 * copy used for the <img src>. Left unchanged for any other link (ordinary
+	 * page links never match the image-extension check below).
+	 */
+	public function processAnchorTag($tag)
+	{
+		if (!preg_match('/href\s*=\s*["\']([^"\']+)["\']/i', $tag, $hrefMatch)) {
+			return $tag;
+		}
+
+		if ($this->hasNoWatermarkClass($tag)) {
+			return $tag;
+		}
+
+		$cachedUrl = $this->resolveWatermarkedUrl($hrefMatch[1]);
+
+		if ($cachedUrl === null) {
+			return $tag;
+		}
+
+		return preg_replace(
+			'/href\s*=\s*["\']([^"\']+)["\']/i',
+			'href="' . $cachedUrl . '"',
+			$tag,
+			1
+		);
+	}
+
+	protected function hasNoWatermarkClass($tag)
+	{
+		if (preg_match('/class\s*=\s*["\']([^"\']*)["\']/i', $tag, $classMatch)) {
+			$classes = preg_split('/\s+/', $classMatch[1]);
+
+			return in_array('no-watermark', $classes, true);
+		}
+
+		return false;
+	}
+
+	/**
+	 * Shared resolution logic for both processImgTag (src) and processAnchorTag
+	 * (href): given a raw attribute value, decide whether it's one of our own
+	 * in-scope images and, if so, return the URL of its cached/watermarked
+	 * copy (building it first if needed). Returns null for anything out of
+	 * scope or on any failure - callers already treat null as "leave as-is".
+	 */
+	protected function resolveWatermarkedUrl($rawValue)
+	{
+		if (!extension_loaded('gd')) {
+			return null;
+		}
+
+		$relPath = $this->toRelativePath($rawValue);
+
+		if ($relPath === null) {
+			return null;
+		}
+
+		$cacheFolder = trim((string) $this->params->get('cache_folder', 'images/fgwatermark_cache'), '/');
+
+		if (strpos($relPath, $cacheFolder) === 0) {
+			return null;
+		}
+
+		if (!$this->inScope($relPath)) {
+			return null;
+		}
+
+		$ext = strtolower(pathinfo($relPath, PATHINFO_EXTENSION));
+
+		if (!in_array($ext, array('jpg', 'jpeg', 'png', 'gif'), true)) {
+			return null;
+		}
+
+		$sourceFullPath = JPATH_ROOT . '/' . $relPath;
+
+		if (!is_file($sourceFullPath)) {
+			return null;
+		}
+
+		$minWidth = (int) $this->params->get('min_width', 150);
+		$size     = @getimagesize($sourceFullPath);
+
+		if ($size === false) {
+			return null;
+		}
+
+		if ($minWidth > 0 && $size[0] < $minWidth && $size[1] < $minWidth) {
+			return null;
+		}
+
+		$cachedRelPath = $this->getCachedImage($relPath, $sourceFullPath, $ext, $size);
+
+		if ($cachedRelPath === null) {
+			return null;
+		}
+
+		return $this->getRootPath() . '/' . $cachedRelPath;
 	}
 
 	/**

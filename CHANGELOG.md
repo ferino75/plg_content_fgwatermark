@@ -1,5 +1,16 @@
 # Changelog - plg_content_fgwatermark
 
+## 2.1.0
+- Added lightbox compatibility: the plugin now also rewrites `<a href="...">`
+  links that point directly at one of your own in-scope images (not just
+  `<img src>`). Lightbox plugins - including FG AutoLightbox - commonly wrap
+  a thumbnail `<img>` in a link to the full-size original for the lightbox
+  to open; without this, the lightbox's full-size view showed the
+  un-watermarked original regardless of plugin execution order. New toggle
+  "Also rewrite links to images" (default: on) in the general settings.
+  The `no-watermark` CSS class exclusion works independently on `<a>` and
+  `<img>` tags, same as before.
+
 ## 2.0.0 - Rebranded into the FG series
 - Renamed element/folder `watermark` → `fgwatermark` (plugin class
   `PlgContentWatermark` → `PlgContentFgwatermark`, language files renamed to

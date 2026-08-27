@@ -6,7 +6,7 @@
 	<creationDate>2026-08-27</creationDate>
 	<copyright>Copyright (C) 2026 Fero. All rights reserved.</copyright>
 	<license>GNU General Public License version 2 or later; see LICENSE.txt</license>
-	<version>2.0.0</version>
+	<version>2.1.0</version>
 	<description>PLG_CONTENT_FGWATERMARK_XML_DESCRIPTION</description>
 	<scriptfile>script.php</scriptfile>
 
@@ -36,6 +36,14 @@
 					label="PLG_CONTENT_FGWATERMARK_SCOPE_FOLDER_LABEL"
 					description="PLG_CONTENT_FGWATERMARK_SCOPE_FOLDER_DESC"
 				/>
+
+				<field name="rewrite_links" type="radio" class="btn-group btn-group-yesno"
+					default="1"
+					label="PLG_CONTENT_FGWATERMARK_REWRITE_LINKS_LABEL"
+					description="PLG_CONTENT_FGWATERMARK_REWRITE_LINKS_DESC">
+					<option value="1">JYES</option>
+					<option value="0">JNO</option>
+				</field>
 
 				<field name="min_width" type="number"
 					default="150"
