@@ -1,4 +1,4 @@
-# FG Watermark
+<h1 align="center">FG Watermark</h1>
 
 ![Joomla](https://img.shields.io/badge/Joomla-3.10%20--%206.x-005E93?logo=joomla&logoColor=white)
 ![License](https://img.shields.io/badge/license-GPL--2.0-blue.svg)
