@@ -4,10 +4,13 @@
 
 <h1 align="center">FG Watermark</h1>
 
-![Version](https://img.shields.io/badge/version-2.0.0-FF6B4A.svg)
-![Joomla](https://img.shields.io/badge/Joomla-3.10%20--%206.x-005E93?logo=joomla&logoColor=white)
-![PHP](https://img.shields.io/badge/PHP-5.6%2B-777BB4?logo=php&logoColor=white)
-![License](https://img.shields.io/badge/license-GPL--2.0-blue.svg)
+<p align="center">
+  <img src="https://img.shields.io/github/v/release/ferino75/plg_content_fgwatermark?color=FF6B4A&label=release" alt="Latest release">
+  <img src="https://img.shields.io/badge/Joomla-3.10%20--%206.x-005E93.svg?logo=joomla&logoColor=white" alt="Joomla">
+  <img src="https://img.shields.io/badge/PHP-5.6%2B-777BB4.svg?logo=php&logoColor=white" alt="PHP">
+  <img src="https://img.shields.io/badge/license-GPL--2.0-green.svg" alt="License">
+  <img src="https://img.shields.io/github/downloads/ferino75/plg_content_fgwatermark/total?cacheSeconds=3600" alt="Downloads">
+</p>
 
 Automatically watermarks images inside Joomla article content — an image
 logo, a text overlay, or both — with cached output so nothing is re-rendered
