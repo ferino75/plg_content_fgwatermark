@@ -20,7 +20,7 @@ class WatermarkEngine
 	 * output, even when no user-facing parameter actually changed (e.g. a bug
 	 * fix in the rendering code itself, like SVG support in 1.6.0).
 	 */
-	const VERSION = '2.1.1';
+	const VERSION = '2.1.2';
 
 	/** @var object  Joomla Registry (or JRegistry) instance - both expose ->get() identically */
 	protected $params;
@@ -157,6 +157,20 @@ class WatermarkEngine
 			return null;
 		}
 
+		// Canonicalize via realpath() and verify containment within JPATH_ROOT
+		// BEFORE any scope/extension check. A naive string-prefix check on the
+		// raw path (inScope() alone) can be bypassed with '../' traversal
+		// segments - strpos('images/../../etc/x.jpg', 'images/') === 0 is true
+		// even though the real file lives entirely outside images/. From here
+		// on, $relPath is the resolved, traversal-free, root-relative path.
+		$resolved = $this->resolveWithinRoot($relPath);
+
+		if ($resolved === null) {
+			return null;
+		}
+
+		list($sourceFullPath, $relPath) = $resolved;
+
 		$cacheFolder = trim((string) $this->params->get('cache_folder', 'images/fgwatermark_cache'), '/');
 
 		if (strpos($relPath, $cacheFolder) === 0) {
@@ -172,8 +186,6 @@ class WatermarkEngine
 		if (!in_array($ext, array('jpg', 'jpeg', 'png', 'gif'), true)) {
 			return null;
 		}
-
-		$sourceFullPath = JPATH_ROOT . '/' . $relPath;
 
 		if (!is_file($sourceFullPath)) {
 			return null;
@@ -197,6 +209,39 @@ class WatermarkEngine
 		}
 
 		return $this->getRootPath() . '/' . $cachedRelPath;
+	}
+
+	/**
+	 * Resolve a root-relative path against JPATH_ROOT and verify - via
+	 * realpath() canonicalization, never a string-prefix check - that it
+	 * doesn't escape the webroot through '../' traversal segments (or
+	 * symlinks pointing outside it). Returns [canonicalFullPath,
+	 * canonicalRootRelativePath] (forward-slash normalized) on success, or
+	 * null if the target doesn't exist or resolves outside JPATH_ROOT.
+	 */
+	protected function resolveWithinRoot($relPath)
+	{
+		$candidate = JPATH_ROOT . '/' . ltrim($relPath, '/');
+		$real      = @realpath($candidate);
+
+		if ($real === false) {
+			return null;
+		}
+
+		$rootReal = @realpath(JPATH_ROOT);
+
+		if ($rootReal === false) {
+			return null;
+		}
+
+		$rootReal = rtrim(str_replace('\\', '/', $rootReal), '/');
+		$real     = str_replace('\\', '/', $real);
+
+		if (strpos($real, $rootReal . '/') !== 0) {
+			return null;
+		}
+
+		return array($real, ltrim(substr($real, strlen($rootReal)), '/'));
 	}
 
 	/**
@@ -312,6 +357,19 @@ class WatermarkEngine
 	protected function getCachedImage($relPath, $sourceFullPath, $ext, $size)
 	{
 		$cacheFolder = trim((string) $this->params->get('cache_folder', 'images/fgwatermark_cache'), '/');
+
+		// Same containment principle as content images, applied differently:
+		// the folder may not exist yet (about to be created below), so
+		// realpath() can't be used to verify it here. Instead, reject any
+		// '..' path segment outright - an admin-configured value should never
+		// legitimately need one, and this is the only way a crafted value
+		// could otherwise walk the cache folder outside JPATH_ROOT.
+		$cacheSegments = explode('/', $cacheFolder);
+
+		if ($cacheFolder === '' || in_array('..', $cacheSegments, true)) {
+			return null;
+		}
+
 		$cacheFullFolder = JPATH_ROOT . '/' . $cacheFolder;
 
 		if (!is_dir($cacheFullFolder)) {
@@ -564,7 +622,17 @@ class WatermarkEngine
 			return;
 		}
 
-		$logoFullPath = JPATH_ROOT . '/' . ltrim($logoRel, '/');
+		// Same containment check as content images (see resolveWatermarkedUrl) -
+		// this value is admin-configured via the plugin's own settings screen,
+		// so the risk is lower, but there's no reason not to apply the same
+		// realpath()-based guard for consistency and defense in depth.
+		$resolved = $this->resolveWithinRoot(ltrim($logoRel, '/'));
+
+		if ($resolved === null) {
+			return;
+		}
+
+		list($logoFullPath, ) = $resolved;
 
 		if (!is_file($logoFullPath)) {
 			return;

@@ -1,5 +1,25 @@
 # Changelog - plg_content_fgwatermark
 
+## 2.1.2 - Security fix
+- Fixed a path traversal vulnerability: `inScope()` compared the configured
+  scope folder against the raw, un-canonicalized path extracted from
+  `<img src>` / `<a href>` (e.g. `strpos('images/../../etc/x.jpg',
+  'images/') === 0` is true), so a crafted path with `../` segments could
+  make the plugin read, watermark, and publish to a public cache URL any
+  readable image file under the webroot - not just files under the
+  configured scope folder(s). Requires the ability to place arbitrary HTML
+  into article content (author/editor-level access), so impact is limited
+  to multi-author sites with lower-trust content contributors, but is a
+  real information-disclosure risk on those. Fixed by resolving the path
+  via `realpath()` and verifying containment within `JPATH_ROOT` *before*
+  any scope check - not a string-prefix check, which traversal segments can
+  bypass. Applied to all three path sources: content images (the actual
+  vector), the configured logo `image_path`, and the configured
+  `cache_folder` (the latter two are admin-configured so lower risk, fixed
+  for consistency/defense in depth - `cache_folder` uses a `..`-segment
+  rejection instead of `realpath()`, since the target folder may not exist
+  yet at the point it's used).
+
 ## 2.1.1
 - Fix: the new "Also rewrite links to images" field description (added in
   2.1.0) contained literal `<a href="...">` / `<img src>` markup inside the
