@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#081D32"/>
+      <stop offset="100%" stop-color="#113758"/>
+    </linearGradient>
+    <clipPath id="squircle">
+      <rect x="0" y="0" width="512" height="512" rx="112" ry="112"/>
+    </clipPath>
+    <clipPath id="photoClip">
+      <rect x="146" y="176" width="220" height="160" rx="16" ry="16"/>
+    </clipPath>
+    <clipPath id="ribbonClip">
+      <rect x="146" y="176" width="220" height="160" rx="16" ry="16"/>
+    </clipPath>
+  </defs>
+
+  <g clip-path="url(#squircle)">
+    <rect x="0" y="0" width="512" height="512" fill="url(#bg)"/>
+
+    <!-- photo card -->
+    <g>
+      <rect x="146" y="176" width="220" height="160" rx="16" ry="16" fill="#F4F7FA"/>
+
+      <!-- photo content: mountain + sun, clipped to card -->
+      <g clip-path="url(#photoClip)">
+        <circle cx="320" cy="206" r="18" fill="#FFC94A"/>
+        <polygon points="146,336 226,246 268,286 320,220 366,336" fill="#0E2C48"/>
+        <polygon points="146,336 200,266 236,300 366,336" fill="#164569"/>
+      </g>
+
+      <!-- diagonal watermark ribbon across the photo -->
+      <g clip-path="url(#ribbonClip)">
+        <rect x="120" y="244" width="280" height="46" transform="rotate(-18 256 256)" fill="#FF6B4A" fill-opacity="0.86"/>
+      </g>
+
+      <!-- card border -->
+      <rect x="146" y="176" width="220" height="160" rx="16" ry="16" fill="none" stroke="#0B2338" stroke-width="4"/>
+    </g>
+  </g>
+</svg>

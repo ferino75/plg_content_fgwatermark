@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension type="plugin" group="content" method="upgrade">
+	<name>PLG_CONTENT_FGWATERMARK</name>
+	<author>Fero</author>
+	<authorUrl>https://github.com/ferino75</authorUrl>
+	<creationDate>2026-08-27</creationDate>
+	<copyright>Copyright (C) 2026 Fero. All rights reserved.</copyright>
+	<license>GNU General Public License version 2 or later; see LICENSE.txt</license>
+	<version>2.0.0</version>
+	<description>PLG_CONTENT_FGWATERMARK_XML_DESCRIPTION</description>
+	<scriptfile>script.php</scriptfile>
+
+	<files>
+		<filename plugin="fgwatermark">fgwatermark.php</filename>
+		<folder>src</folder>
+		<folder>language</folder>
+	</files>
+
+	<updateservers>
+		<server type="extension" priority="1" name="FG Watermark Update Site">https://raw.githubusercontent.com/ferino75/plg_content_fgwatermark/master/updates.xml</server>
+	</updateservers>
+
+	<languages>
+		<language tag="en-GB">language/en-GB/en-GB.plg_content_fgwatermark.ini</language>
+		<language tag="en-GB">language/en-GB/en-GB.plg_content_fgwatermark.sys.ini</language>
+		<language tag="sk-SK">language/sk-SK/sk-SK.plg_content_fgwatermark.ini</language>
+		<language tag="sk-SK">language/sk-SK/sk-SK.plg_content_fgwatermark.sys.ini</language>
+	</languages>
+
+	<config>
+		<fields name="params">
+			<fieldset name="basic">
+
+				<field name="scope_folder" type="text"
+					default="images/"
+					label="PLG_CONTENT_FGWATERMARK_SCOPE_FOLDER_LABEL"
+					description="PLG_CONTENT_FGWATERMARK_SCOPE_FOLDER_DESC"
+				/>
+
+				<field name="min_width" type="number"
+					default="150"
+					label="PLG_CONTENT_FGWATERMARK_MIN_WIDTH_LABEL"
+					description="PLG_CONTENT_FGWATERMARK_MIN_WIDTH_DESC"
+				/>
+
+				<field name="cache_folder" type="text"
+					default="images/fgwatermark_cache"
+					label="PLG_CONTENT_FGWATERMARK_CACHE_FOLDER_LABEL"
+					description="PLG_CONTENT_FGWATERMARK_CACHE_FOLDER_DESC"
+				/>
+
+				<field name="cache_expiry" type="number"
+					default="0"
+					label="PLG_CONTENT_FGWATERMARK_CACHE_EXPIRY_LABEL"
+					description="PLG_CONTENT_FGWATERMARK_CACHE_EXPIRY_DESC"
+				/>
+
+				<field name="jpeg_quality" type="number"
+					default="85"
+					label="PLG_CONTENT_FGWATERMARK_JPEG_QUALITY_LABEL"
+					description="PLG_CONTENT_FGWATERMARK_JPEG_QUALITY_DESC"
+				/>
+
+			</fieldset>
+
+			<fieldset name="image_watermark" label="PLG_CONTENT_FGWATERMARK_FIELDSET_IMAGE">
+
+				<field name="image_enable" type="radio" class="btn-group btn-group-yesno"
+					default="0"
+					label="PLG_CONTENT_FGWATERMARK_IMAGE_ENABLE_LABEL"
+					description="PLG_CONTENT_FGWATERMARK_IMAGE_ENABLE_DESC">
+					<option value="1">JYES</option>
+					<option value="0">JNO</option>
+				</field>
+
+				<field name="image_path" type="media"
+					default=""
+					preview="true"
+					label="PLG_CONTENT_FGWATERMARK_IMAGE_PATH_LABEL"
+					description="PLG_CONTENT_FGWATERMARK_IMAGE_PATH_DESC"
+				/>
+
+				<field name="image_position" type="list"
+					default="br"
+					label="PLG_CONTENT_FGWATERMARK_POSITION_LABEL"
+					description="PLG_CONTENT_FGWATERMARK_IMAGE_POSITION_DESC">
+					<option value="tl">PLG_CONTENT_FGWATERMARK_POS_TL</option>
+					<option value="tc">PLG_CONTENT_FGWATERMARK_POS_TC</option>
+					<option value="tr">PLG_CONTENT_FGWATERMARK_POS_TR</option>
+					<option value="cl">PLG_CONTENT_FGWATERMARK_POS_CL</option>
+					<option value="cc">PLG_CONTENT_FGWATERMARK_POS_CC</option>
+					<option value="cr">PLG_CONTENT_FGWATERMARK_POS_CR</option>
+					<option value="bl">PLG_CONTENT_FGWATERMARK_POS_BL</option>
+					<option value="bc">PLG_CONTENT_FGWATERMARK_POS_BC</option>
+					<option value="br">PLG_CONTENT_FGWATERMARK_POS_BR</option>
+				</field>
+
+				<field name="image_margin" type="number"
+					default="10"
+					label="PLG_CONTENT_FGWATERMARK_MARGIN_LABEL"
+					description="PLG_CONTENT_FGWATERMARK_IMAGE_MARGIN_DESC"
+				/>
+
+				<field name="image_scale" type="number"
+					default="20"
+					label="PLG_CONTENT_FGWATERMARK_IMAGE_SCALE_LABEL"
+					description="PLG_CONTENT_FGWATERMARK_IMAGE_SCALE_DESC"
+				/>
+
+				<field name="image_max_upscale" type="number"
+					default="3"
+					filter="float"
+					label="PLG_CONTENT_FGWATERMARK_IMAGE_MAX_UPSCALE_LABEL"
+					description="PLG_CONTENT_FGWATERMARK_IMAGE_MAX_UPSCALE_DESC"
+				/>
+
+				<field name="image_opacity" type="number"
+					default="60"
+					label="PLG_CONTENT_FGWATERMARK_OPACITY_LABEL"
+					description="PLG_CONTENT_FGWATERMARK_IMAGE_OPACITY_DESC"
+				/>
+
+			</fieldset>
+
+			<fieldset name="text_watermark" label="PLG_CONTENT_FGWATERMARK_FIELDSET_TEXT">
+
+				<field name="text_enable" type="radio" class="btn-group btn-group-yesno"
+					default="0"
+					label="PLG_CONTENT_FGWATERMARK_TEXT_ENABLE_LABEL"
+					description="PLG_CONTENT_FGWATERMARK_TEXT_ENABLE_DESC">
+					<option value="1">JYES</option>
+					<option value="0">JNO</option>
+				</field>
+
+				<field name="text_content" type="text"
+					default="© Site Name"
+					label="PLG_CONTENT_FGWATERMARK_TEXT_CONTENT_LABEL"
+					description="PLG_CONTENT_FGWATERMARK_TEXT_CONTENT_DESC"
+				/>
+
+				<field name="text_font" type="text"
+					default=""
+					label="PLG_CONTENT_FGWATERMARK_TEXT_FONT_LABEL"
+					description="PLG_CONTENT_FGWATERMARK_TEXT_FONT_DESC"
+				/>
+
+				<field name="text_size" type="number"
+					default="16"
+					label="PLG_CONTENT_FGWATERMARK_TEXT_SIZE_LABEL"
+					description="PLG_CONTENT_FGWATERMARK_TEXT_SIZE_DESC"
+				/>
+
+				<field name="text_color" type="color"
+					default="#FFFFFF"
+					label="PLG_CONTENT_FGWATERMARK_TEXT_COLOR_LABEL"
+					description="PLG_CONTENT_FGWATERMARK_TEXT_COLOR_DESC"
+				/>
+
+				<field name="text_position" type="list"
+					default="br"
+					label="PLG_CONTENT_FGWATERMARK_POSITION_LABEL"
+					description="PLG_CONTENT_FGWATERMARK_TEXT_POSITION_DESC">
+					<option value="tl">PLG_CONTENT_FGWATERMARK_POS_TL</option>
+					<option value="tc">PLG_CONTENT_FGWATERMARK_POS_TC</option>
+					<option value="tr">PLG_CONTENT_FGWATERMARK_POS_TR</option>
+					<option value="cl">PLG_CONTENT_FGWATERMARK_POS_CL</option>
+					<option value="cc">PLG_CONTENT_FGWATERMARK_POS_CC</option>
+					<option value="cr">PLG_CONTENT_FGWATERMARK_POS_CR</option>
+					<option value="bl">PLG_CONTENT_FGWATERMARK_POS_BL</option>
+					<option value="bc">PLG_CONTENT_FGWATERMARK_POS_BC</option>
+					<option value="br">PLG_CONTENT_FGWATERMARK_POS_BR</option>
+				</field>
+
+				<field name="text_margin" type="number"
+					default="10"
+					label="PLG_CONTENT_FGWATERMARK_MARGIN_LABEL"
+					description="PLG_CONTENT_FGWATERMARK_TEXT_MARGIN_DESC"
+				/>
+
+				<field name="text_opacity" type="number"
+					default="70"
+					label="PLG_CONTENT_FGWATERMARK_OPACITY_LABEL"
+					description="PLG_CONTENT_FGWATERMARK_TEXT_OPACITY_DESC"
+				/>
+
+			</fieldset>
+
+		</fields>
+	</config>
+</extension>

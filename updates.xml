@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<updates>
+	<update>
+		<name>FG Watermark</name>
+		<description>Automatically watermarks images inside article content (image logo and/or text), with cached output and cross-version support from Joomla 3.10 through Joomla 6.</description>
+		<element>fgwatermark</element>
+		<type>plugin</type>
+		<folder>content</folder>
+		<client>site</client>
+		<version>2.0.0</version>
+		<infourl title="FG Watermark">https://github.com/ferino75/plg_content_fgwatermark</infourl>
+		<!-- Matches Joomla 3.x, 4.x, 5.x and 6.x - single build covers all of them. -->
+		<targetplatform name="joomla" version="[3-6]\..*"/>
+		<downloads>
+			<downloadurl type="full" format="zip">https://github.com/ferino75/plg_content_fgwatermark/releases/download/v2.0.0/plg_content_fgwatermark_v2.0.0.zip</downloadurl>
+		</downloads>
+		<tags>
+			<tag>stable</tag>
+		</tags>
+	</update>
+</updates>
